@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teen Patti Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🃏 Teen Patti Admin Panel</h1>
+            <p>Manage your real-world Teen Patti game with ease</p>
+        </div>
+        
+        <!-- Game Setup Section -->
+        <div class="game-setup">
+            <h2>🎯 Game Setup</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numPlayers">Number of Players (3-6)</label>
+                    <select id="numPlayers">
+                        <option value="3">3 Players</option>
+                        <option value="4" selected>4 Players</option>
+                        <option value="5">5 Players</option>
+                        <option value="6">6 Players</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bootAmount">Boot Amount (₹)</label>
+                    <input type="number" id="bootAmount" value="10" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="gameVariation">Game Variation</label>
+                    <select id="gameVariation">
+                        <option value="classic">Classic Teen Patti</option>
+                        <option value="muflis">Muflis (Lowest wins)</option>
+                        <option value="ak47">AK47 (Jokers)</option>
+                        <option value="999">999 (Number total)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startNewGame()">🚀 Start New Game</button>
+            <button class="btn btn-secondary" onclick="resetGame()">🔄 Reset Game</button>
+        </div>
+        
+        <!-- Players and Controls Section -->
+        <div class="players-section">
+            <div class="players-list">
+                <h2>👥 Players</h2>
+                <div id="playersContainer">
+                    <!-- Players will be dynamically added here -->
+                </div>
+                <button class="btn btn-primary" onclick="showAddPlayerModal()">➕ Add Player</button>
+            </div>
+            
+            <div class="game-controls">
+                <h2>🎮 Game Controls</h2>
+                <div class="form-group">
+                    <label for="currentPlayer">Current Player</label>
+                    <select id="currentPlayer">
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="betAmount">Bet Amount (₹)</label>
+                    <input type="number" id="betAmount" min="1" placeholder="Enter bet amount">
+                </div>
+                <div class="betting-controls">
+                    <button class="btn btn-primary" onclick="placeBet('blind')">👁️‍🗨️ Blind Bet</button>
+                    <button class="btn btn-secondary" onclick="placeBet('seen')">👁️ Seen Bet (Chaal)</button>
+                    <button class="btn btn-danger" onclick="foldPlayer()">🚫 Fold</button>
+                    <button class="btn btn-primary" onclick="showSideshow()">🤝 Sideshow</button>
+                    <button class="btn btn-secondary" onclick="showFinalShow()">🎭 Show</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game State Section -->
+        <div class="game-state">
+            <h2>💰 Current Game State</h2>
+            <div class="pot-display">
+                <div>Total Pot</div>
+                <div class="pot-amount" id="totalPot">₹0</div>
+                <div>Current Stake: ₹<span id="currentStake">0</span></div>
+                <div>Players Remaining: <span id="playersRemaining">0</span></div>
+            </div>
+        </div>
+        
+        <!-- Hand Rankings Reference -->
+        <div class="hand-rankings">
+            <h2>🏆 Hand Rankings (Highest to Lowest)</h2>
+            <div class="ranking-item">
+                <span><strong>1. Trail (Three of a Kind)</strong></span>
+                <span>A-A-A > K-K-K > ... > 2-2-2</span>
+            </div>
+            <div class="ranking-item">
+                <span><strong>2. Pure Sequence (Straight Flush)</strong></span>
+                <span>A-K-Q of same suit</span>
+            </div>
+            <div class="ranking-item">
+                <span><strong>3. Sequence (Straight)</strong></span>
+                <span>A-K-Q of mixed suits</span>
+            </div>
+            <div class="ranking-item">
+                <span><strong>4. Color (Flush)</strong></span>
+                <span>Same suit, not in sequence</span>
+            </div>
+            <div class="ranking-item">
+                <span><strong>5. Pair</strong></span>
+                <span>A-A-K > K-K-A > ... > 2-2-3</span>
+            </div>
+            <div class="ranking-item">
+                <span><strong>6. High Card</strong></span>
+                <span>A-K-J > A-K-10 > ...</span>
+            </div>
+        </div>
+        
+        <!-- Game Log -->
+        <div class="game-log">
+            <h2>📝 Game Log</h2>
+            <div id="gameLog">
+                <div class="log-entry">Game initialized. Waiting for players...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Player Modal -->
+    <div id="addPlayerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addPlayerModal')">&times;</span>
+            <h2>Add New Player</h2>
+            <div class="form-group">
+                <label for="playerName">Player Name</label>
+                <input type="text" id="playerName" placeholder="Enter player name">
+            </div>
+            <div class="form-group">
+                <label for="playerBalance">Starting Balance (₹)</label>
+                <input type="number" id="playerBalance" value="1000" min="1">
+            </div>
+            <button class="btn btn-primary" onclick="addPlayer()">Add Player</button>
+        </div>
+    </div>
+    
+    <!-- Sideshow Modal -->
+    <div id="sideshowModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('sideshowModal')">&times;</span>
+            <h2>Sideshow Request</h2>
+            <p>Select the player to compare cards with:</p>
+            <div class="form-group">
+                <select id="sideshowTarget">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <p>Cost: ₹<span id="sideshowCost">0</span> (2x current stake)</p>
+            <button class="btn btn-primary" onclick="requestSideshow()">Request Sideshow</button>
+        </div>
+    </div>
+    
+    <!-- Show Modal -->
+    <div id="showModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('showModal')">&times;</span>
+            <h2>Final Show</h2>
+            <p>Only available when 2 players remain!</p>
+            <p>Cost: ₹<span id="showCost">0</span></p>
+            <button class="btn btn-primary" onclick="finalShow()">Show Cards</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
